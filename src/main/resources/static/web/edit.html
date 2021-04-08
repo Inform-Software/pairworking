@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="de">
+<head>
+    <meta charset="utf-8">
+    <title>Pairworking App</title>
+    <link href="../style/style.css" rel="stylesheet">
+    <script src="../scripts/jquery-3.6.0.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+
+</head>
+<body>
+<div id="header">
+    <h1>Willkommen bei der Pairworking App!</h1>
+</div>
+<div id="inputform" class="modal" :style="{ display: visible }" >
+    <div class="modal-content">
+        <span class="close" @click="close">&#10006;</span>
+        <form id="inputform" @submit="checkForm">
+            <h2 v-if="intentIsUpdate">Supportfall bearbeiten:</h2>
+            <h2 v-else>Neuen Supportfall hinzufügen:</h2>
+            <table class="inputTable">
+                <tr>
+                    <td><label for="operator">Benutzer (mehrere mit Komma): </label></td>
+                    <td><input type="text" id="operator" v-model="operator" placeholder="vorname.nachname"></td>
+                    <td><label for="team">Team: </label></td>
+                    <td><select name="team" id="team" v-model="team">
+                        <option value="VDS-a">VDS-a</option>
+                        <option value="VDS-b">VDS-b</option>
+                        <option value="VDS-c">VDS-c</option>
+                        <option value="VDS-d">VDS-d</option>
+                    </select></td>
+                </tr>
+                <tr>
+                    <td><label for="ticket">Ticket: </label></td>
+                    <td><input type="text" id="ticket" v-model="ticket"></td>
+                    <td><label for="description">Beschreibung: </label></td>
+                    <td rowspan="2"><textarea id="description" rows="4" cols="35" v-model="description"></textarea></td>
+                </tr>
+                <tr>
+                    <td><label for="begin">Beginn: </label></td>
+                    <td>
+                        <input type="date" id="begin" v-model="begin">
+                        <input type="time" name="begin" v-model="btime">
+                    </td>
+                </tr>
+                <tr>
+                    <td v-if="intentIsUpdate"><label for="end">Ende: </label></td>
+                    <td v-if="intentIsUpdate">
+                        <input type="date" id="end" v-model="end">
+                        <input type="time" name="end" v-model="etime">
+                    </td>
+                    <td v-if="intentIsUpdate"><label for="mark">Bewertung (Schulnote): </label></td>
+                    <td v-if="intentIsUpdate">
+                        <select name="mark" id="mark" v-model="mark">
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr v-if="missing">
+                    <td colspan="4">
+                        <p v-for="(usr, index) in missing" :index="index">
+                            <label for="inputtoken">{{usr.name}}</label>
+                            <input type="text" id="inputtoken" placeholder="Kürzel" v-model="usr.token">
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td><input type="submit" value="Bestätigen"></td>
+                </tr>
+            </table>
+
+        </form>
+    </div>
+</div>
+<div id="content">
+    <button class="btn def" onclick="window.location.href='./view.html'">Alle Supportfälle anzeigen</button>
+    <button class="btn def" id="selected">Supportfälle bearbeiten</button>
+    <button class="btn def" onclick="window.location.href='./data.html'">Stammdaten einsehen</button>
+    <!--
+    <div id="inputform" :style="{ display: visible }" class="modal">
+        <div class="modal-content">
+            <span class="close" @click="close">&#10006;</span>
+            <p>Test Test</p>
+        </div>
+        Nicht löschen!
+        <form id="inputform" @submit="checkForm">
+            <h2 v-if="intentIsUpdate">Supportfall bearbeiten:</h2>
+            <h2 v-else>Neuen Supportfall hinzufügen:</h2>
+            <table class="inputTable">
+                <tr>
+                    <td><label for="operator">Benutzer (mehrere mit Komma): </label></td>
+                    <td><input type="text" id="operator" v-model="operator" placeholder="vorname.nachname"></td>
+                    <td><label for="team">Team: </label></td>
+                    <td><select name="team" id="team" v-model="team">
+                        <option value="VDS-a">VDS-a</option>
+                        <option value="VDS-b">VDS-b</option>
+                        <option value="VDS-c">VDS-c</option>
+                        <option value="VDS-d">VDS-d</option>
+                    </select></td>
+                </tr>
+                <tr>
+                    <td><label for="ticket">Ticket: </label></td>
+                    <td><input type="text" id="ticket" v-model="ticket"></td>
+                    <td><label for="description">Beschreibung: </label></td>
+                    <td><input type="text" id="description" v-model="description"></td>
+                </tr>
+                <tr>
+                    <td><label for="begin">Beginn: </label></td>
+                    <td>
+                        <input type="date" id="begin" v-model="begin">
+                        <input type="time" name="begin" v-model="btime">
+                    </td>
+                    <td v-if="intentIsUpdate"><label for="end">Ende: </label></td>
+                    <td v-if="intentIsUpdate">
+                        <input type="date" id="end" v-model="end">
+                        <input type="time" name="end" v-model="etime">
+                    </td>
+                </tr>
+                <tr>
+                    <td v-if="intentIsUpdate"><label for="mark">Bewertung (Schulnote): </label></td>
+                    <td v-if="intentIsUpdate">
+                        <select name="mark" id="mark" v-model="mark">
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                        </select>
+                    </td>
+                    <td><input type="submit" value="Bestätigen"></td>
+                </tr>
+            </table>
+
+        </form>
+    </div> -->
+    <div id="table">
+        <h2>Supportfälle<button @click="openCreateTask" class="btn def" style="font-size: .9em; width: 90px">Neu</button></h2>
+        <!--
+        <form @submit="handleSearch">
+            <input type="text" v-model="search" placeholder="Ticket eingeben">
+            <input type="submit" value="Suchen">
+        </form>
+        -->
+        <table>
+            <colgroup>
+                <col style="width: 9%;">
+                <col style="width: 9%;">
+                <col style="width: 9%;">
+                <col style="width: 7%;">
+                <col style="width: 49%;">
+                <col style="width: 9%;">
+                <col style="width: 5%;">
+                <col style="width: 3%;">
+            </colgroup>
+            <tr>
+                <th @click="toggleOrder('begin')">Beginn <span v-if="thSelected['begin']"><span v-if="orderDesc">&#8595;</span><span v-else>&#8593;</span></th>
+                <th @click="toggleOrder('ticket')">Ticket <span v-if="thSelected['ticket']"><span v-if="orderDesc">&#8595;</span><span v-else>&#8593;</span></th>
+                <th @click="toggleOrder('operator')">Benutzer <span v-if="thSelected['operator']"><span v-if="orderDesc">&#8595;</span><span v-else>&#8593;</span></th>
+                <th @click="toggleOrder('team')">Team <span v-if="thSelected['team']"><span v-if="orderDesc">&#8595;</span><span v-else>&#8593;</span></th>
+                <th @click="toggleOrder('description')">Beschreibung <span v-if="thSelected['description']"><span v-if="orderDesc">&#8595;</span><span v-else>&#8593;</span></th>
+                <th @click="toggleOrder('end')">Ende <span v-if="thSelected['end']"><span v-if="orderDesc">&#8595;</span><span v-else>&#8593;</span></th>
+                <th @click="toggleOrder('mark')">Note <span v-if="thSelected['mark']"><span v-if="orderDesc">&#8595;</span><span v-else>&#8593;</span></th>
+                <th></th>
+            </tr>
+            <tr v-for="(task, index) in tasks" :index="index" :id="task.id">
+                <td>{{task.begin}}</td>
+                <td><a :href="'https://gs2-jira.inform-software.com/browse/' + task.ticket">{{task.ticket}}</a></td>
+                <td :title="task.operator">{{formatOperator(index)}}</td>
+                <td>{{task.team}}</td>
+                <td>{{task.description}}</td>
+                <td>{{task.end}}</td>
+                <td v-if="task.mark != 0" :id=" 'mark' + task.mark" class="mark"><b>{{task.mark}}</b></td>
+                <td v-else>-</td>
+                <td style="width: 100px">
+                    <button class="btn def" title="Bearbeiten" @click="editTask(index)" style="width: 90%;">&#9998;</button>
+                    <!-- <button class="btn del" title="Löschen" @click="confirmDeleteTask(task.id)">&#10006;</button> -->
+                </td>
+            </tr>
+        </table>
+    </div>
+
+</div>
+
+<script src="../scripts/script.js"></script>
+</body>
+</html>

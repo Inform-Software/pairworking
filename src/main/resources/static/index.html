@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="de">
+<head>
+    <meta charset="utf-8">
+    <title>Pairworking App</title>
+    <link href="./style/style.css" rel="stylesheet">
+    <script src="./scripts/jquery-3.6.0.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+</head>
+<body>
+<div id="header">
+    <h1>Willkommen bei der Pairworking App!</h1>
+    <!--
+    <form id="login" @submit="login">
+        <h1>Login</h1>
+        <label for="name">Benutzername: </label>
+        <input type="text" id="name" placeholder="vorname.nachname" v-model="name" @change="checkToken">
+        <label for="token">Kürzel: </label>
+        <input type="text" id="token" v-model="token">
+        <input type="submit" value="Anmelden">
+    </form>
+    -->
+</div>
+<div id="content">
+    <button class="btn def" onclick="window.location.href='web/view.html'">Alle Supportfälle anzeigen</button>
+    <button class="btn def" onclick="window.location.href='web/edit.html'">Supportfälle bearbeiten</button>
+    <button class="btn def" onclick="window.location.href='web/data.html'">Stammdaten einsehen</button>
+
+    <div id="table">
+        <h2>Die neuesten Supportfälle:</h2>
+        <table>
+            <colgroup>
+                <col style="width: 9%;">
+                <col style="width: 9%;">
+                <col style="width: 9%;">
+                <col style="width: 7%;">
+                <col style="width: 52%;">
+                <col style="width: 9%;">
+                <col style="width: 5%;">
+            </colgroup>
+            <tr>
+                <th>Beginn</th>
+                <th>Ticket</th>
+                <th>Benutzer</th>
+                <th>Team</th>
+                <th>Beschreibung</th>
+                <th>Ende</th>
+                <th>Note</th>
+            </tr>
+            <tr v-for="(task, index) in recentTasks" :index="index" :id="task.id">
+                <td>{{task.begin}}</td>
+                <td><a :href="'https://gs2-jira.inform-software.com/browse/' + task.ticket">{{task.ticket}}</a></td>
+                <td :title="task.operator">{{formatOperator(index)}}</td>
+                <td v-else>{{task.operator}}</td>
+                <td>{{task.team}}</td>
+                <td>{{task.description}}</td>
+                <td>{{task.end}}</td>
+                <td v-if="task.mark != 0" :id=" 'mark' + task.mark" class="mark"><b>{{task.mark}}</b></td>
+                <td v-else>-</td>
+            </tr>
+        </table>
+
+    </div>
+</div>
+<script src="./scripts/welcome.js"></script>
+<script src="./scripts/script.js"></script>
+</body>
