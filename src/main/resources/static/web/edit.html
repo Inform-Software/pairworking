@@ -62,8 +62,9 @@
                         </select>
                     </td>
                 </tr>
-                <tr v-if="missing">
+                <tr v-if="missing.length > 0">
                     <td colspan="4">
+                        <strong>Ein oder mehrere Nutzer wurden nicht gefunden, können aber unter Angabe eines Kürzels erstellt werden.</strong>
                         <p v-for="(usr, index) in missing" :index="index">
                             <label for="inputtoken">{{usr.name}}</label>
                             <input type="text" id="inputtoken" placeholder="Kürzel" v-model="usr.token">
@@ -71,7 +72,7 @@
                     </td>
                 </tr>
                 <tr>
-                    <td><input type="submit" value="Bestätigen"></td>
+                    <td colspan="4"><input type="submit" value="Bestätigen"><button v-if="intentIsUpdate" class="deleteButton" title="Löschen" @click="confirmDeleteTask(id)">Supportfall Löschen</button></td>
                 </tr>
             </table>
 

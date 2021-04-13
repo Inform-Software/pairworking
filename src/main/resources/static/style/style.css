@@ -36,6 +36,14 @@ table, th, td {
     border: 1px solid #fefefe;
     border-radius: 3px;
 }
+
+.deleteButton {
+    background-color: #ff5050;
+    border: 1px solid red;
+    padding: 5px;
+    border-radius: 3px;
+    float: right;
+}
 th, th::selection {
     cursor: pointer;
     background-color: white;

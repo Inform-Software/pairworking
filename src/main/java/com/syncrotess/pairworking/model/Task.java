@@ -61,6 +61,9 @@ public class Task {
     }
     operators.add (operator);
   }
+  public void removeOperators () {
+    operators.clear ();
+  }
 
   public Set<User> getOperators () {
     return operators;

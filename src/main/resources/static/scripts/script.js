@@ -68,9 +68,6 @@ var vm = new Vue({
         refreshUsers();
     },
     methods: {
-        confirmDeleteTask: function (id) {
-            confirmDeleteTask(id)
-        },
         editTask: function (index) {
             input.visible = 'block';
             input.ticket = this.tasks[index].ticket;
@@ -152,6 +149,8 @@ var input = new Vue({
             if (this.intentIsUpdate) {
                 if (this.ticket && this.description && this.begin && this.end && this.mark && this.operator && this.team) {
                     updateTask(this.id);
+                    this.resetData();
+                    window.location.href = "/web/edit.html";
                 }
             } else {
                 if (this.ticket && this.description && this.begin && this.operator && this.team) {
@@ -167,26 +166,23 @@ var input = new Vue({
                             }
                         }
                         if (present == false) {
-                            absent.push(array[a]);
+                            absent.push(op);
                         }
                     }
                     if (this.missing.length === 0) {
-                        for (name in absent) {
-                            this.missing.push({"name": absent[name]});
+                        for (var n = 0; n < absent.length; n++) {
+                            this.missing.push({"name": absent[n]});
                         }
                         console.log(this.missing);
                     }
-                    if (absent.length === 1) {
-                        //alert(absent.join(', ') + " ist nicht in der Datenbank verzeichnet");
-                        //return;
-                    } else if (absent.length > 1) {
-                        //alert(absent.join(', ') + " sind nicht in der Datenbank verzeichnet");
-                        //return;
-                    } if (absent.length === 0 || this.checkForToken) {
-                        for (var i=0; i<this.missing.length; i++) {
+                    if (absent.length === 0 || this.checkForTokens()) {
+                        console.log(this.checkForTokens());
+                        for (var i = 0; i < this.missing.length; i++) {
                             createUser(this.missing[i].name, this.missing[i].token);
                         }
                         createTask(this.ticket, this.description, this.begin, this.btime, this.operator, this.team);
+                        this.resetData();
+                        window.location.href = "/web/edit.html";
                     }
                 }
             }
@@ -201,18 +197,27 @@ var input = new Vue({
             this.visible = 'none';
             this.resetData();
         },
-        checkForToken: function () {
+        checkForTokens: function () {
             try {
-                for (var i=0; i<this.missing.length; i++) {
+                var noToken = [];
+                console.log("Token: '" + this.missing[0].token + "'");
+                for (var i = 0; i < this.missing.length; i++) {
                     if (!this.missing[i].token) {
-                        return false;
+                        noToken.push('x');
                     }
                 }
-                return true;
+                if (noToken.length === 0) {
+                    return true;
+                } else {
+                    return false;
+                }
             } catch (e) {
                 return false;
             }
-        }
+        },
+        confirmDeleteTask: function (id) {
+            confirmDeleteTask(id)
+        },
     },
     mounted() {
         refreshUsers();
@@ -269,6 +274,7 @@ function deleteTask(id) {
     axios
         .delete("/api/tasks/" + id)
         .then(function (response) {
+            console.log(response);
             refreshTasks(vm.category, vm.order);
         });
 }
@@ -276,6 +282,7 @@ function deleteTask(id) {
 function confirmDeleteTask(id) {
     var result = confirm("Möchtest Du diesen Supportfall (ID:" + id + ") wirklich löschen?");
     if (result === true) {
+        input.resetData();
         deleteTask(id);
     }
 }

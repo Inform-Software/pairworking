@@ -140,6 +140,20 @@ public class TaskController {
   @DeleteMapping("/tasks/{id}")
   public ResponseEntity<HttpStatus> deleteTask(@PathVariable("id") Long id) {
     try {
+      Optional<Task> taskData = taskRepo.findById (id);
+      if (taskData.isPresent () ) {
+        Task task = taskData.get ();
+        String[] userlist = task.formatOperator ();
+        for ( int i=0; i<userlist.length; i++) {
+          User user = findUser(userlist[i]);
+          if (user == null) {
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+          }
+          user.getDoneTask().clear ();
+          userRepo.save (user);
+        }
+        task.removeOperators();
+      }
       taskRepo.deleteById(id);
       return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     } catch (Exception e) {
