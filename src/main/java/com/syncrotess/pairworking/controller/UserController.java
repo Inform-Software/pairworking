@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -68,7 +69,7 @@ public class UserController {
       List<User> users = new ArrayList<>();
 
       if (name == null)
-        userRepository.findAll ().forEach (users::add);
+        userRepository.findAll (Sort.by(new Sort.Order(Sort.Direction.ASC, "name"))).forEach (users::add);
       else
         userRepository.findByNameContaining(name).forEach (users::add);
 

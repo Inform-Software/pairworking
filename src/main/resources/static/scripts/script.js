@@ -8,39 +8,6 @@ var time = hours + ':' + minutes;
 today = yyyy + '-' + mm + '-' + dd;
 
 
-var login = new Vue({
-    el: '#login',
-    data: {
-        users: '',
-        name: '',
-        team: '',
-        selected: '',
-    },
-    mounted() {
-        refreshUsers();
-    },
-    methods: {
-        login: function (e) {
-            if (this.name && this.team) {
-                this.name = this.name.toLowerCase();
-                var present = false;
-                for (u = 0; u < this.users.length; u++) {
-                    console.log(this.users[u].name, this.users[u].team, this.users[0].id);
-                    if (this.name === this.users[u].name && this.team === this.users[u].team) {
-                        this.selected = this.users[u];
-                        present = true;
-                    }
-                }
-                if (present == false) {
-                    createUser(this.name, this.team);
-                    console.log(this.users[0].name, this.users[0].team);
-                }
-            }
-            e.preventDefault();
-        }
-    }
-})
-
 var vm = new Vue({
     el: '#table',
     data: {
@@ -53,6 +20,10 @@ var vm = new Vue({
         orderDesc: true,
         thSelected: {},
         search: '',
+        teams: '',
+    },
+    watch: {
+        search: 'handleSearch'
     },
     mounted() {
         this.thSelected = {
@@ -66,6 +37,7 @@ var vm = new Vue({
         }
         refreshTasks(this.category, this.order);
         refreshUsers();
+        refreshTeams();
     },
     methods: {
         editTask: function (index) {
@@ -120,6 +92,7 @@ var vm = new Vue({
             refreshTasks(this.category, this.order);
         },
         handleSearch: function () {
+            /*
             var term = this.search.replace(/[-_~]/g, '').toLowerCase();
             console.log(term);
             for (var t = 0; t < this.tasks.length; t++) {
@@ -131,10 +104,44 @@ var vm = new Vue({
                     return;
                 }
             }
+            */
+            var categories = ["beginn", "ticket", "operator", "team", "description", "end", "mark"];
+            if (this.search === '') {
+                makeTasksVisible();
+            } else {
+                loopTasks: for (var i=0; i<this.tasks.length; i++) {
+                    for (key in this.tasks[i]) {
+                        if (categories.includes(key)) {
+                            if (this.tasks[i][key].toString().toLowerCase().indexOf(this.search.toLowerCase())!=-1) {
+                                this.tasks[i].visible = true;
+                                continue loopTasks;
+                            }
+                        }
+                        this.tasks[i].visible = false;
+                    }
+                }
+                for (var u=0; u<this.tasks.length; u++) {
+                    console.log(this.tasks[u].visible);
+                }
+            }
+
+
         },
         openCreateTask: function () {
             input.intentIsUpdate = false;
             input.visible = 'block';
+        },
+        editMasterData: function (selection, index) {
+            if (selection === 'user') {
+                input.mUserName = this.users[index].name;
+                input.mUserToken = this.users[index].token;
+                input.id = this.users[index].id;
+            } else if (selection === 'team') {
+                input.mTeamName = this.teams[index].name;
+                input.id = this.teams[index].id;
+            }
+            input.intentIsUpdate = true;
+            input.selMasterData = selection;
         }
     }
 });
@@ -154,34 +161,43 @@ var input = new Vue({
                 }
             } else {
                 if (this.ticket && this.description && this.begin && this.operator && this.team) {
-                    var array = this.operator.toLowerCase().split(',');
+                    var array = this.operator.split(',');
                     var absent = [];
                     var present;
                     for (var a = 0; a < array.length; a++) {
                         var op = array[a].trim();
                         present = false;
-                        for (var u = 0; u < vm.users.length; u++) {
-                            if (op === vm.users[u].name) {
-                                present = true;
+                        if (op.includes('.') && op.length > 6) {
+                            for (var u = 0; u < vm.users.length; u++) {
+                                if (op.toLowerCase() === vm.users[u].name) {
+                                    present = true;
+                                }
+                            }
+                            if (present == false) {
+                                this.missing.push({"name": op});
+                            }
+                        } else {
+                            for (var t = 0; t < vm.users.length; t++) {
+                                if (op === vm.users[t].token) {
+                                    present = true;
+                                    this.operator = this.operator.replace(op, vm.users[t].name);
+                                    console.log(this.operator);
+                                }
+                            }
+                            if (present == false) {
+                                this.unknownTokens.push(op);
                             }
                         }
-                        if (present == false) {
-                            absent.push(op);
-                        }
                     }
-                    if (this.missing.length === 0) {
-                        for (var n = 0; n < absent.length; n++) {
-                            this.missing.push({"name": absent[n]});
-                        }
-                        console.log(this.missing);
-                    }
-                    if (absent.length === 0 || this.checkForTokens()) {
+                    if (this.unknownTokens.length === 0 && (this.missing.length === 0 || this.checkForTokens())) {
                         console.log(this.checkForTokens());
                         for (var i = 0; i < this.missing.length; i++) {
                             createUser(this.missing[i].name, this.missing[i].token);
                         }
                         createTask(this.ticket, this.description, this.begin, this.btime, this.operator, this.team);
                         this.resetData();
+                        refreshUsers();
+                        refreshTasks();
                         window.location.href = "/web/edit.html";
                     }
                 }
@@ -218,6 +234,27 @@ var input = new Vue({
         confirmDeleteTask: function (id) {
             confirmDeleteTask(id)
         },
+        checkMasterForm: function () {
+            if (this.selMasterData === 'user') {
+                if (this.mUserName && this.mUserToken) {
+                    if (this.intentIsUpdate) {
+                        updateUser(this.id);
+                    } else {
+                        createUser(this.mUserName, this.mUserToken);
+                    }
+                    this.resetData();
+                }
+            } else if (this.selMasterData === 'team') {
+                if (this.mTeamName) {
+                    if (this.intentIsUpdate) {
+                        updateTeam(this.id);
+                    } else {
+                        createTeam(this.mTeamName);
+                    }
+                    this.resetData();
+                }
+            }
+        }
     },
     mounted() {
         refreshUsers();
@@ -230,8 +267,16 @@ function refreshTasks(category, order) {
         .then(function (response) {
             vm.tasks = response.data;
             vm.recentTasks = vm.tasks.slice(0, 5);
+            makeTasksVisible();
+            vm.search = '';
         })
         .catch(error => console.error(error));
+}
+
+function makeTasksVisible () {
+    for (var t = 0; t < vm.tasks.length; t++) {
+        vm.tasks[t].visible = true;
+    }
 }
 
 function refreshUsers() {
@@ -239,7 +284,17 @@ function refreshUsers() {
         .get('/api/users')
         .then(function (response) {
             vm.users = response.data;
-            login.users = response.data;
+            input.users = response.data;
+        })
+        .catch(error => console.error(error));
+}
+
+function refreshTeams() {
+    axios
+        .get('/api/teams')
+        .then(function (response) {
+            vm.teams = response.data;
+            input.teams = response.data;
         })
         .catch(error => console.error(error));
 }
@@ -267,6 +322,17 @@ function createUser(name, token) {
         .then(function (response) {
             console.log(response)
             refreshUsers();
+        })
+}
+
+function createTeam(name) {
+    axios
+        .post("/api/teams", {
+            name: name
+        })
+        .then(function (response) {
+            console.log(response)
+            refreshTeams();
         })
 }
 
@@ -303,6 +369,27 @@ function updateTask(id) {
         })
 }
 
+function updateUser(id) {
+    axios
+        .put("/api/users/" + input.id, {
+            name: input.mUserName,
+            token: input.mUserToken
+        })
+        .then(function (response) {
+            refreshUsers();
+        })
+}
+
+function updateTeam(id) {
+    axios
+        .put("/api/teams/" + input.id, {
+            name: input.mTeamName
+        })
+        .then(function (response) {
+            refreshTeams();
+        })
+}
+
 function inputInit() {
     return {
         ticket: '',
@@ -315,8 +402,15 @@ function inputInit() {
         operator: '',
         team: '',
         intentIsUpdate: false,
+        selMasterData: '',
         id: 0,
         visible: 'none',
         missing: [],
+        unknownTokens: [],
+        teams: '',
+        users: '',
+        mUserName: '',
+        mUserToken: '',
+        mTeamName: '',
     }
 }

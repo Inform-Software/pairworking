@@ -140,3 +140,16 @@ a:link, a:visited {
     text-decoration: none;
     cursor: pointer;
 }
+
+.vertical {
+    margin: 10px 0px;
+    padding: 0px 10px;
+    width: 50%;
+    border: 1px solid white;
+    vertical-align: top;
+}
+
+.data:hover {
+    cursor: pointer;
+    color: #0091A5;
+}

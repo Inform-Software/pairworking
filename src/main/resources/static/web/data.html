@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="de">
+<head>
+    <meta charset="utf-8">
+    <title>Stammdaten</title>
+    <link href="../style/style.css" rel="stylesheet">
+    <script src="../scripts/jquery-3.6.0.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+
+</head>
+<body>
+<div id="header">
+    <h1>Willkommen bei der Pairworking App!</h1>
+</div>
+
+<div id="content">
+    <button class="btn def" onclick="window.location.href='./view.html'">Alle Supportfälle anzeigen</button>
+    <button class="btn def" onclick="window.location.href='./edit.html'">Supportfälle bearbeiten</button>
+    <button class="btn def" id="selected">Stammdaten einsehen</button>
+    <table style="width: 100%; margin: 0px; border: 1px solid white">
+        <tr>
+            <td class="vertical"><h1>Registrierte Nutzer</h1></td>
+            <td class="vertical"><h1>Teams</h1></td>
+        </tr>
+        <tr id="inputform">
+            <td class="vertical" v-if="selMasterData=='user'">
+                <h3 v-if="!intentIsUpdate">Neuen Benutzer erstellen:<br></h3>
+                <h3 v-else>Benutzer bearbeiten:<br></h3>
+                <form @submit="checkMasterForm">
+                    <input type="text" id="mUserName" v-model="mUserName" placeholder="vorname.nachname">
+                    <input type="text" id="mUserToken" v-model="mUserToken" placeholder="Kürzel">
+                    <input type="submit" value="Bestätigen">
+                </form>
+            </td>
+            <td class="vertical" v-if="selMasterData=='team'"></td>
+            <td class="vertical" v-if="selMasterData=='team'">
+                <h3 v-if="!intentIsUpdate">Neues Team erstellen:<br></h3>
+                <h3 v-else>Team bearbeiten:<br></h3>
+                <form @submit="checkMasterForm">
+                    <input type="text" id="mTeamName" v-model="mTeamName" placeholder="Team">
+                    <input type="submit" value="Bestätigen">
+                </form>
+            </td>
+        </tr>
+        <tr id="table">
+            <td class="vertical">
+                <ul>
+                    <li v-for="(usr, index) in users" :index="index" style="font-size: 1.2em"><span class="data" @click="editMasterData('user', index)">{{usr.name}}: <em>{{usr.token}}</em></span></li>
+                </ul>
+            </td>
+            <td class="vertical">
+                <ul>
+                    <li v-for="(team, index) in teams" :index="index" style="font-size: 1.2em"><span class="data" @click="editMasterData('team', index)">{{team.name}}</span></li>
+                </ul>
+            </td>
+        </tr>
+
+    </table>
+</div>
+
+<script src="../scripts/script.js"></script>
+</body>
+</html>

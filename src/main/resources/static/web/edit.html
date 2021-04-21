@@ -22,13 +22,10 @@
             <table class="inputTable">
                 <tr>
                     <td><label for="operator">Benutzer (mehrere mit Komma): </label></td>
-                    <td><input type="text" id="operator" v-model="operator" placeholder="vorname.nachname"></td>
+                    <td><input type="text" id="operator" v-model="operator" placeholder="vorname.nachname oder Kürzel"></td>
                     <td><label for="team">Team: </label></td>
                     <td><select name="team" id="team" v-model="team">
-                        <option value="VDS-a">VDS-a</option>
-                        <option value="VDS-b">VDS-b</option>
-                        <option value="VDS-c">VDS-c</option>
-                        <option value="VDS-d">VDS-d</option>
+                        <option v-for="(team, index) in teams" :value="team.name">{{team.name}}</option>
                     </select></td>
                 </tr>
                 <tr>
@@ -71,6 +68,11 @@
                         </p>
                     </td>
                 </tr>
+                <tr v-if="unknownTokens.length > 0">
+                    <td colspan="4">
+                        <p v-for="(tkn, index) in unknownTokens" :index="index">Unbekanntes Kürzel: {{tkn}}</p>
+                    </td>
+                </tr>
                 <tr>
                     <td colspan="4"><input type="submit" value="Bestätigen"><button v-if="intentIsUpdate" class="deleteButton" title="Löschen" @click="confirmDeleteTask(id)">Supportfall Löschen</button></td>
                 </tr>
@@ -83,64 +85,6 @@
     <button class="btn def" onclick="window.location.href='./view.html'">Alle Supportfälle anzeigen</button>
     <button class="btn def" id="selected">Supportfälle bearbeiten</button>
     <button class="btn def" onclick="window.location.href='./data.html'">Stammdaten einsehen</button>
-    <!--
-    <div id="inputform" :style="{ display: visible }" class="modal">
-        <div class="modal-content">
-            <span class="close" @click="close">&#10006;</span>
-            <p>Test Test</p>
-        </div>
-        Nicht löschen!
-        <form id="inputform" @submit="checkForm">
-            <h2 v-if="intentIsUpdate">Supportfall bearbeiten:</h2>
-            <h2 v-else>Neuen Supportfall hinzufügen:</h2>
-            <table class="inputTable">
-                <tr>
-                    <td><label for="operator">Benutzer (mehrere mit Komma): </label></td>
-                    <td><input type="text" id="operator" v-model="operator" placeholder="vorname.nachname"></td>
-                    <td><label for="team">Team: </label></td>
-                    <td><select name="team" id="team" v-model="team">
-                        <option value="VDS-a">VDS-a</option>
-                        <option value="VDS-b">VDS-b</option>
-                        <option value="VDS-c">VDS-c</option>
-                        <option value="VDS-d">VDS-d</option>
-                    </select></td>
-                </tr>
-                <tr>
-                    <td><label for="ticket">Ticket: </label></td>
-                    <td><input type="text" id="ticket" v-model="ticket"></td>
-                    <td><label for="description">Beschreibung: </label></td>
-                    <td><input type="text" id="description" v-model="description"></td>
-                </tr>
-                <tr>
-                    <td><label for="begin">Beginn: </label></td>
-                    <td>
-                        <input type="date" id="begin" v-model="begin">
-                        <input type="time" name="begin" v-model="btime">
-                    </td>
-                    <td v-if="intentIsUpdate"><label for="end">Ende: </label></td>
-                    <td v-if="intentIsUpdate">
-                        <input type="date" id="end" v-model="end">
-                        <input type="time" name="end" v-model="etime">
-                    </td>
-                </tr>
-                <tr>
-                    <td v-if="intentIsUpdate"><label for="mark">Bewertung (Schulnote): </label></td>
-                    <td v-if="intentIsUpdate">
-                        <select name="mark" id="mark" v-model="mark">
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
-                            <option value="5">5</option>
-                            <option value="6">6</option>
-                        </select>
-                    </td>
-                    <td><input type="submit" value="Bestätigen"></td>
-                </tr>
-            </table>
-
-        </form>
-    </div> -->
     <div id="table">
         <h2>Supportfälle<button @click="openCreateTask" class="btn def" style="font-size: .9em; width: 90px">Neu</button></h2>
         <!--

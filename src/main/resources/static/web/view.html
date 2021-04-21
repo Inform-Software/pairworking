@@ -17,6 +17,7 @@
     <button class="btn def" onclick="window.location.href='./edit.html'">Supportfälle bearbeiten</button>
     <button class="btn def" onclick="window.location.href='./data.html'">Stammdaten einsehen</button>
     <div id="table">
+        <div style="padding: 10px 0px 0px 0px;"><input type="text" placeholder="Suchen" v-model="search"></div>
         <table>
             <colgroup>
                 <col style="width: 9%;">
@@ -36,7 +37,7 @@
                 <th @click="toggleOrder('end')">Ende <span v-if="thSelected['end']"><span v-if="orderDesc">&#8595;</span><span v-else>&#8593;</span></th>
                 <th @click="toggleOrder('mark')">Note <span v-if="thSelected['mark']"><span v-if="orderDesc">&#8595;</span><span v-else>&#8593;</span></th>
             </tr>
-            <tr v-for="(task, index) in tasks" :index="index" :id="task.id">
+            <tr v-for="(task, index) in tasks" :index="index" :id="task.id" v-if="task.visible==true">
                 <td>{{task.begin}}</td>
                 <td><a :href="'https://gs2-jira.inform-software.com/browse/' + task.ticket">{{task.ticket}}</a></td>
                 <td :title="task.operator">{{formatOperator(index)}}</td>
