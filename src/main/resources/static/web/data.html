@@ -11,7 +11,7 @@
 </head>
 <body>
 <div id="header">
-    <h1>Willkommen bei der Pairworking App!</h1>
+    <h1>Pairworking App</h1>
 </div>
 
 <div id="content">
@@ -44,12 +44,12 @@
             </td>
         </tr>
         <tr id="table">
-            <td class="vertical">
+            <td class="vertical"><button @click="openCreateMasterData('user')" class="btn def" style="font-size: .9em; width: 90px">Neu</button>
                 <ul>
                     <li v-for="(usr, index) in users" :index="index" style="font-size: 1.2em"><span class="data" @click="editMasterData('user', index)">{{usr.name}}: <em>{{usr.token}}</em></span></li>
                 </ul>
             </td>
-            <td class="vertical">
+            <td class="vertical"><button @click="openCreateMasterData('team')" class="btn def" style="font-size: .9em; width: 90px">Neu</button>
                 <ul>
                     <li v-for="(team, index) in teams" :index="index" style="font-size: 1.2em"><span class="data" @click="editMasterData('team', index)">{{team.name}}</span></li>
                 </ul>

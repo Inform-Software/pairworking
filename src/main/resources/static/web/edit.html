@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="utf-8">
-    <title>Pairworking App</title>
+    <title>Supportfälle bearbeiten</title>
     <link href="../style/style.css" rel="stylesheet">
     <script src="../scripts/jquery-3.6.0.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -11,7 +11,7 @@
 </head>
 <body>
 <div id="header">
-    <h1>Willkommen bei der Pairworking App!</h1>
+    <h1>Pairworking App</h1>
 </div>
 <div id="inputform" class="modal" :style="{ display: visible }" >
     <div class="modal-content">
@@ -87,12 +87,7 @@
     <button class="btn def" onclick="window.location.href='./data.html'">Stammdaten einsehen</button>
     <div id="table">
         <h2>Supportfälle<button @click="openCreateTask" class="btn def" style="font-size: .9em; width: 90px">Neu</button></h2>
-        <!--
-        <form @submit="handleSearch">
-            <input type="text" v-model="search" placeholder="Ticket eingeben">
-            <input type="submit" value="Suchen">
-        </form>
-        -->
+        <div style="padding: 10px 0px 0px 0px;"><input type="text" placeholder="Suchen" v-model="search"></div>
         <table>
             <colgroup>
                 <col style="width: 9%;">

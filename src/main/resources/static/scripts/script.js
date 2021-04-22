@@ -92,26 +92,20 @@ var vm = new Vue({
             refreshTasks(this.category, this.order);
         },
         handleSearch: function () {
-            /*
-            var term = this.search.replace(/[-_~]/g, '').toLowerCase();
-            console.log(term);
-            for (var t = 0; t < this.tasks.length; t++) {
-                if (term == t.ticket.replace(/[-_~]/g, '').toLowerCase()) {
-                    this.category = 'ticket';
-                    this.order = 'asc';
-                    window.location.href = "/web/edit.html#" + t.id;
-                    console.log("/web/edit.html#" + t.id);
-                    return;
-                }
-            }
-            */
             var categories = ["beginn", "ticket", "operator", "team", "description", "end", "mark"];
             if (this.search === '') {
                 makeTasksVisible();
             } else {
                 loopTasks: for (var i=0; i<this.tasks.length; i++) {
                     for (key in this.tasks[i]) {
-                        if (categories.includes(key)) {
+                        if (key === "operators") {
+                            for (var j=0; j<this.tasks[i].operators.length; j++) {
+                                if (this.tasks[i].operators[j].token.toString().indexOf(this.search) !=-1) {
+                                    this.tasks[i].visible = true;
+                                    continue loopTasks;
+                                }
+                            }
+                        } if (categories.includes(key)) {
                             if (this.tasks[i][key].toString().toLowerCase().indexOf(this.search.toLowerCase())!=-1) {
                                 this.tasks[i].visible = true;
                                 continue loopTasks;
@@ -119,9 +113,6 @@ var vm = new Vue({
                         }
                         this.tasks[i].visible = false;
                     }
-                }
-                for (var u=0; u<this.tasks.length; u++) {
-                    console.log(this.tasks[u].visible);
                 }
             }
 
@@ -141,6 +132,10 @@ var vm = new Vue({
                 input.id = this.teams[index].id;
             }
             input.intentIsUpdate = true;
+            input.selMasterData = selection;
+        },
+        openCreateMasterData: function(selection) {
+            input.intentIsUpdate = false;
             input.selMasterData = selection;
         }
     }
@@ -162,7 +157,6 @@ var input = new Vue({
             } else {
                 if (this.ticket && this.description && this.begin && this.operator && this.team) {
                     var array = this.operator.split(',');
-                    var absent = [];
                     var present;
                     for (var a = 0; a < array.length; a++) {
                         var op = array[a].trim();
@@ -173,15 +167,15 @@ var input = new Vue({
                                     present = true;
                                 }
                             }
-                            if (present == false) {
+                            if (present == false && !this.missingNames.includes(op)) {
                                 this.missing.push({"name": op});
+                                this.missingNames.push(op);
                             }
                         } else {
                             for (var t = 0; t < vm.users.length; t++) {
                                 if (op === vm.users[t].token) {
                                     present = true;
                                     this.operator = this.operator.replace(op, vm.users[t].name);
-                                    console.log(this.operator);
                                 }
                             }
                             if (present == false) {
@@ -190,7 +184,6 @@ var input = new Vue({
                         }
                     }
                     if (this.unknownTokens.length === 0 && (this.missing.length === 0 || this.checkForTokens())) {
-                        console.log(this.checkForTokens());
                         for (var i = 0; i < this.missing.length; i++) {
                             createUser(this.missing[i].name, this.missing[i].token);
                         }
@@ -216,7 +209,6 @@ var input = new Vue({
         checkForTokens: function () {
             try {
                 var noToken = [];
-                console.log("Token: '" + this.missing[0].token + "'");
                 for (var i = 0; i < this.missing.length; i++) {
                     if (!this.missing[i].token) {
                         noToken.push('x');
@@ -406,6 +398,7 @@ function inputInit() {
         id: 0,
         visible: 'none',
         missing: [],
+        missingNames: [],
         unknownTokens: [],
         teams: '',
         users: '',
