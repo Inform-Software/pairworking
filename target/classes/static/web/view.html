@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Alle Supportfälle</title>
+    <link href="../style/style.css" rel="stylesheet">
+    <script src="../scripts/jquery-3.6.0.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+</head>
+<body>
+<div id="header">
+    <h1>Pairworking App</h1>
+</div>
+<div id="content">
+    <button class="btn def" id="selected">Alle Supportfälle anzeigen</button>
+    <button class="btn def" onclick="window.location.href='./edit.html'">Supportfälle bearbeiten</button>
+    <button class="btn def" onclick="window.location.href='./data.html'">Stammdaten einsehen</button>
+    <div id="table">
+        <div style="padding: 10px 0px 0px 0px;"><input type="text" placeholder="Suchen" v-model="search"></div>
+        <table>
+            <colgroup>
+                <col style="width: 9%;">
+                <col style="width: 9%;">
+                <col style="width: 9%;">
+                <col style="width: 7%;">
+                <col style="width: 52%;">
+                <col style="width: 9%;">
+                <col style="width: 5%;">
+            </colgroup>
+            <tr>
+                <th @click="toggleOrder('begin')">Beginn <span v-if="thSelected['begin']"><span v-if="orderDesc">&#8595;</span><span v-else>&#8593;</span></th>
+                <th @click="toggleOrder('ticket')">Ticket <span v-if="thSelected['ticket']"><span v-if="orderDesc">&#8595;</span><span v-else>&#8593;</span></th>
+                <th @click="toggleOrder('operator')">Benutzer <span v-if="thSelected['operator']"><span v-if="orderDesc">&#8595;</span><span v-else>&#8593;</span></th>
+                <th @click="toggleOrder('team')">Team <span v-if="thSelected['team']"><span v-if="orderDesc">&#8595;</span><span v-else>&#8593;</span></th>
+                <th @click="toggleOrder('description')">Beschreibung <span v-if="thSelected['description']"><span v-if="orderDesc">&#8595;</span><span v-else>&#8593;</span></th>
+                <th @click="toggleOrder('end')">Ende <span v-if="thSelected['end']"><span v-if="orderDesc">&#8595;</span><span v-else>&#8593;</span></th>
+                <th @click="toggleOrder('mark')">Note <span v-if="thSelected['mark']"><span v-if="orderDesc">&#8595;</span><span v-else>&#8593;</span></th>
+            </tr>
+            <tr v-for="(task, index) in tasks" :index="index" :id="task.id" v-if="task.visible==true">
+                <td>{{task.begin}}</td>
+                <td><a :href="'https://gs2-jira.inform-software.com/browse/' + task.ticket">{{task.ticket}}</a></td>
+                <td :title="task.operator">{{formatOperator(index)}}</td>
+                <td>{{task.team}}</td>
+                <td>{{task.description}}</td>
+                <td>{{task.end}}</td>
+                <td v-if="task.mark != 0" :id=" 'mark' + task.mark" class="mark"><b>{{task.mark}}</b></td>
+                <td v-else>-</td>
+            </tr>
+        </table>
+    </div>
+</div>
+<script src="../scripts/script.js"></script>
+</body>
+</html>
