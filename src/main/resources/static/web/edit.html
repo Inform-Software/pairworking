@@ -24,9 +24,10 @@
                     <td><label for="operator">Benutzer (mehrere mit Komma): </label></td>
                     <td><input type="text" id="operator" v-model="operator" placeholder="vorname.nachname oder Kürzel"></td>
                     <td><label for="team">Team: </label></td>
-                    <td><select name="team" id="team" v-model="team">
+                    <td v-if="!intentIsUpdate"><select name="team" id="team" v-model="team">
                         <option v-for="(team, index) in teams" :value="team.name">{{team.name}}</option>
                     </select></td>
+                    <td v-else>Team: {{team}}</td>
                 </tr>
                 <tr>
                     <td><label for="ticket">Ticket: </label></td>
@@ -50,12 +51,22 @@
                     <td v-if="intentIsUpdate"><label for="mark">Bewertung (Schulnote): </label></td>
                     <td v-if="intentIsUpdate">
                         <select name="mark" id="mark" v-model="mark">
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
-                            <option value="5">5</option>
-                            <option value="6">6</option>
+                            <option value="15">1+</option>
+                            <option value="14">1</option>
+                            <option value="13">1-</option>
+                            <option value="12">2+</option>
+                            <option value="11">2</option>
+                            <option value="10">2-</option>
+                            <option value="9">3+</option>
+                            <option value="8">3</option>
+                            <option value="7">3-</option>
+                            <option value="6">4+</option>
+                            <option value="5">4</option>
+                            <option value="4">4-</option>
+                            <option value="3">5+</option>
+                            <option value="2">5</option>
+                            <option value="1">5-</option>
+                            <option value="0">6</option>
                         </select>
                     </td>
                 </tr>
@@ -87,7 +98,12 @@
     <button class="btn def" onclick="window.location.href='./data.html'">Stammdaten einsehen</button>
     <div id="table">
         <h2>Supportfälle<button @click="openCreateTask" class="btn def" style="font-size: .9em; width: 90px">Neu</button></h2>
-        <div style="padding: 10px 0px 0px 0px;"><input type="text" placeholder="Suchen" v-model="search"></div>
+        <div style="padding: 10px 0px 0px 0px;"><input type="text" placeholder="Suchen" v-model="search">
+            <div class="tooltip">Suchfunktionen
+                <span class="tooltiptext"><em>Kategoriekürzel</em>:<em>Suchbegriff</em><br>Kategorien&#10141;<b>begin,ticket,user,team,desc,end,mark</b><br>oder
+                "&#60;&#47;&#62;" statt ":" bei Zeitangaben (Format <em>JJJJMMTT</em>)</span>
+              </div>
+            </div>
         <table>
             <colgroup>
                 <col style="width: 9%;">
@@ -109,14 +125,14 @@
                 <th @click="toggleOrder('mark')">Note <span v-if="thSelected['mark']"><span v-if="orderDesc">&#8595;</span><span v-else>&#8593;</span></th>
                 <th></th>
             </tr>
-            <tr v-for="(task, index) in tasks" :index="index" :id="task.id">
+            <tr v-for="(task, index) in tasks" :index="index" :id="task.id" v-if="task.visible==true">
                 <td>{{task.begin}}</td>
                 <td><a :href="'https://gs2-jira.inform-software.com/browse/' + task.ticket">{{task.ticket}}</a></td>
                 <td :title="task.operator">{{formatOperator(index)}}</td>
                 <td>{{task.team}}</td>
                 <td>{{task.description}}</td>
                 <td>{{task.end}}</td>
-                <td v-if="task.mark != 0" :id=" 'mark' + task.mark" class="mark"><b>{{task.mark}}</b></td>
+                <td v-if="task.mark != 0" :id=" 'mark' + task.mark" class="mark"><b>{{marklist[task.mark]}}</b></td>
                 <td v-else>-</td>
                 <td style="width: 100px">
                     <button class="btn def" title="Bearbeiten" @click="editTask(index)" style="width: 90%;">&#9998;</button>

@@ -17,7 +17,12 @@
     <button class="btn def" onclick="window.location.href='./edit.html'">Supportfälle bearbeiten</button>
     <button class="btn def" onclick="window.location.href='./data.html'">Stammdaten einsehen</button>
     <div id="table">
-        <div style="padding: 10px 0px 0px 0px;"><input type="text" placeholder="Suchen" v-model="search"></div>
+        <div style="padding: 10px 0px 0px 0px;"><input type="text" placeholder="Suchen" v-model="search">
+            <div class="tooltip">Suchfunktionen
+                <span class="tooltiptext"><em>Kategoriekürzel</em>:<em>Suchbegriff</em><br>Kategorien&#10141;<b>begin,ticket,user,team,desc,end,mark</b><br>oder
+                "&#60;&#47;&#62;" statt ":" bei Zeitangaben (Format <em>JJJJMMTT</em>)</span>
+              </div>
+        </div>
         <table>
             <colgroup>
                 <col style="width: 9%;">
@@ -44,7 +49,7 @@
                 <td>{{task.team}}</td>
                 <td>{{task.description}}</td>
                 <td>{{task.end}}</td>
-                <td v-if="task.mark != 0" :id=" 'mark' + task.mark" class="mark"><b>{{task.mark}}</b></td>
+                <td v-if="task.mark != 0" :id=" 'mark' + task.mark" class="mark"><b>{{marklist[task.mark]}}</b></td>
                 <td v-else>-</td>
             </tr>
         </table>

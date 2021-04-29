@@ -6,6 +6,7 @@ var hours = String(today.getHours()).padStart(2, '0');
 var minutes = String(today.getMinutes()).padStart(2, '0');
 var time = hours + ':' + minutes;
 today = yyyy + '-' + mm + '-' + dd;
+var marks = {15: '1+', 14: '1', 13: '1-', 12: '2+', 11: '2', 10: '2-', 9: '3+', 8: '3', 7: '3-', 6: '4+', 5: '4', 4: '4-', 3: '5+', 2: '5', 1: '5-', 0: '6', }
 
 
 var vm = new Vue({
@@ -21,6 +22,7 @@ var vm = new Vue({
         thSelected: {},
         search: '',
         teams: '',
+        marklist: marks,
     },
     watch: {
         search: 'handleSearch'
@@ -89,27 +91,86 @@ var vm = new Vue({
             } else {
                 this.order = "asc";
             }
-            refreshTasks(this.category, this.order);
+            // refreshTasks(this.category, this.order);
+            this.tasks.sort(sortTasks(this.category, this.order));
         },
         handleSearch: function () {
-            var categories = ["beginn", "ticket", "operator", "team", "description", "end", "mark"];
-            if (this.search === '') {
-                makeTasksVisible();
-            } else {
-                loopTasks: for (var i=0; i<this.tasks.length; i++) {
+            var categories = ["begin", "ticket", "operator", "team", "description", "end", "mark"];
+            var term = '';
+            var filter = '';
+            var limit = '';
+            if (this.search != '') {
+                if (this.search.indexOf(':') != -1) {
+                    filter = this.search.substring(0, this.search.indexOf(':')).trim();
+                    switch (filter) {
+                        case 'begin': categories = ["begin"]; break;
+                        case 'end': categories = ["end"]; break;
+                        case 'team': categories = ["team"]; break;
+                        case 'desc': categories = ["description"]; break;
+                        case 'user': categories = ["operator"]; break;
+                        case 'mark': categories = ["mark"]; break;
+                        case 'ticket': categories = ["ticket"]; break;
+                    }
+                    if (categories.length == 1) {
+                        term = this.search.substring(this.search.indexOf(':') + 1).trim();
+                    } 
+                } else if (this.search.indexOf('<') != -1) {
+                    filter = this.search.substring(0, this.search.indexOf('<')).trim();
+                    switch (filter) {
+                        case 'begin': categories = ["begin"]; break;
+                        case 'end': categories = ["end"]; break;
+                    }
+                    if (categories.length == 1) {
+                        term = this.search.substring(this.search.indexOf('<') + 1).trim();
+                        limit = 'upper';
+                        this.orderDesc = false;
+                        this.toggleOrder(categories[0]);
+                    }
+                } else if (this.search.indexOf('>') != -1) {
+                    filter = this.search.substring(0, this.search.indexOf('>')).trim();
+                    switch (filter) {
+                        case 'begin': categories = ["begin"]; break;
+                        case 'end': categories = ["end"]; break;
+                    }
+                    if (categories.length == 1) {
+                        term = this.search.substring(this.search.indexOf('>') + 1).trim();
+                        limit = 'lower';
+                        this.orderDesc = true;
+                        this.toggleOrder(categories[0]);
+                    }
+                }
+                if (term == '' && filter == '') {
+                    term = this.search.trim();}
+                if (term === '') {
+                    makeTasksVisible();
+                }
+                loopTasks: for (var i = 0; i < this.tasks.length; i++) {
                     for (key in this.tasks[i]) {
-                        if (key === "operators") {
-                            for (var j=0; j<this.tasks[i].operators.length; j++) {
-                                if (this.tasks[i].operators[j].token.toString().indexOf(this.search) !=-1) {
+                        if (key === "operators" && (categories.length > 1 || filter == 'operator')) {
+                            for (var j = 0; j < this.tasks[i].operators.length; j++) {
+                                if (this.tasks[i].operators[j].token.toString().indexOf(term) != -1) {
                                     this.tasks[i].visible = true;
                                     continue loopTasks;
                                 }
                             }
                         } if (categories.includes(key)) {
-                            if (this.tasks[i][key].toString().toLowerCase().indexOf(this.search.toLowerCase())!=-1) {
-                                this.tasks[i].visible = true;
-                                continue loopTasks;
+                            if (limit == 'upper' && term.replaceAll('-','').length == 8) {
+                                if (this.tasks[i][key].substring(0,10).replaceAll('-','') <= term.replaceAll('-','')) {
+                                    this.tasks[i].visible = true;
+                                    continue loopTasks;
+                                }
+                            } else if (limit == 'lower' && term.replaceAll('-','').length == 8) {
+                                if (this.tasks[i][key].substring(0,10).replaceAll('-','') >= term.replaceAll('-','')) {
+                                    this.tasks[i].visible = true;
+                                    continue loopTasks;
+                                }
+                            } else {
+                                if (this.tasks[i][key].toString().toLowerCase().indexOf(term.toLowerCase()) != -1) {
+                                    this.tasks[i].visible = true;
+                                    continue loopTasks;
+                                }
                             }
+
                         }
                         this.tasks[i].visible = false;
                     }
@@ -134,7 +195,7 @@ var vm = new Vue({
             input.intentIsUpdate = true;
             input.selMasterData = selection;
         },
-        openCreateMasterData: function(selection) {
+        openCreateMasterData: function (selection) {
             input.intentIsUpdate = false;
             input.selMasterData = selection;
         }
@@ -168,7 +229,7 @@ var input = new Vue({
                                 }
                             }
                             if (present == false && !this.missingNames.includes(op)) {
-                                this.missing.push({"name": op});
+                                this.missing.push({ "name": op });
                                 this.missingNames.push(op);
                             }
                         } else {
@@ -253,6 +314,32 @@ var input = new Vue({
     }
 })
 
+function inputInit() {
+    return {
+        ticket: '',
+        description: '',
+        begin: today,
+        btime: time,
+        end: today,
+        etime: time,
+        mark: 0,
+        operator: '',
+        team: '',
+        intentIsUpdate: false,
+        selMasterData: '',
+        id: 0,
+        visible: 'none',
+        missing: [],
+        missingNames: [],
+        unknownTokens: [],
+        teams: '',
+        users: '',
+        mUserName: '',
+        mUserToken: '',
+        mTeamName: '',
+    }
+}
+
 function refreshTasks(category, order) {
     axios
         .get('/api/order/tasks/' + category + '/' + order)
@@ -265,7 +352,18 @@ function refreshTasks(category, order) {
         .catch(error => console.error(error));
 }
 
-function makeTasksVisible () {
+function sortTasks(category, order) {
+    return function (a, b) {
+        var result = (a[category] < b[category]) ? -1 : (a[category] > b[category]) ? 1 : 0;
+        if (order === 'asc') {
+            return result;
+        } else {
+            return result * -1;
+        }
+    }
+}
+
+function makeTasksVisible() {
     for (var t = 0; t < vm.tasks.length; t++) {
         vm.tasks[t].visible = true;
     }
@@ -382,28 +480,3 @@ function updateTeam(id) {
         })
 }
 
-function inputInit() {
-    return {
-        ticket: '',
-        description: '',
-        begin: today,
-        btime: time,
-        end: today,
-        etime: time,
-        mark: 0,
-        operator: '',
-        team: '',
-        intentIsUpdate: false,
-        selMasterData: '',
-        id: 0,
-        visible: 'none',
-        missing: [],
-        missingNames: [],
-        unknownTokens: [],
-        teams: '',
-        users: '',
-        mUserName: '',
-        mUserToken: '',
-        mTeamName: '',
-    }
-}
